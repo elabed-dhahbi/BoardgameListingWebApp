@@ -14,10 +14,11 @@ pipeline {
                      }
          }
         stage('Build & Test') {
-            steps {
-                sh 'mvn clean verify'
-            }
-        }
+    steps {
+        sh '/usr/bin/mvn -v'
+        sh '/usr/bin/mvn clean verify'
+    }
+}
 
         stage('SonarQube Analysis') {
             steps {
