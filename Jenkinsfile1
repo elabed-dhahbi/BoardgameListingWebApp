@@ -7,33 +7,64 @@ pipeline {
     }
     
     environment {
-        SCANNER_HOME= tool 'sonar-scanner'
+        SONARQUBE_ENV = 'SONAR_LATEST'
     }
 
-    stages {        
-        stage('Compile') {
+    stages {
+        stage('Build & Test') {
             steps {
-                sh "mvn compile"
+                sh 'mvn clean verify'
             }
         }
         
-        stage('Test') {
+        stage('SonarQube Analysis') {
             steps {
-                sh "mvn test"
-            }
-        }
-        
-        stage('SonarQube') {
-            steps {
-                withSonarQubeEnv('sonar') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Boardgame -Dsonar.projectKey=Boardgame -Dsonar.java.binaries=target/classes '''
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
         
-        stage('Build') {
+        stage('Quality Gate') {
             steps {
-                sh "mvn package"
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+}pipeline {
+    agent any
+    
+    tools {
+        maven 'maven3'
+        jdk 'jdk17'
+    }
+    
+    environment {
+        SONARQUBE_ENV = 'SONAR_LATEST'
+    }
+
+    stages {
+        stage('Build & Test') {
+            steps {
+                sh 'mvn clean verify'
+            }
+        }
+        
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
+        
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
     }
