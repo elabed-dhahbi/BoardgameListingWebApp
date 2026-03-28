@@ -7,7 +7,12 @@ pipeline {
     }
 
     stages {
-
+       stage('Debug') {
+            steps {
+                   sh 'echo $PATH'
+                   sh 'which mvn || true'
+                     }
+         }
         stage('Build & Test') {
             steps {
                 sh 'mvn clean verify'
