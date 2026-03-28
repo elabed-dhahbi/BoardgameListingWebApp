@@ -9,6 +9,7 @@ pipeline {
     stages {
        stage('Debug') {
             steps {
+                   sh 'hostname'
                    sh 'echo $PATH'
                    sh 'which mvn || true'
                      }
